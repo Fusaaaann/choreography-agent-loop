@@ -1,0 +1,66 @@
+{
+  "piece_title": "My Dance Piece",
+  "duration": 300,
+  "phases": [
+    {
+      "phase": "A",
+      "name": "Opening",
+      "time_window": [0, 50],
+      "core_function": "Establish the opening mood.",
+      "lyric_anchors": ["opening lyric"],
+      "required_motif_groups": [
+        ["STILLNESS", "BOWED_BODY"],
+        ["KNEEL"]
+      ],
+      "required_intents": ["MOURNING", "REVERENCE"],
+      "required_formations_any": ["CENTER_LEAD"],
+      "hard_requirements": [],
+      "weight": 15
+    },
+    {
+      "phase": "B",
+      "name": "Development",
+      "time_window": [50, 150],
+      "core_function": "Develop the central theme.",
+      "lyric_anchors": ["mid lyric"],
+      "required_motif_groups": [
+        ["ADVANCING_STEP"],
+        ["OUTWARD_OPENING"]
+      ],
+      "required_intents": ["REMEMBRANCE", "COMPASSION"],
+      "required_formations_any": ["OPEN_SEMICIRCLE"],
+      "hard_requirements": [],
+      "weight": 20
+    },
+    {
+      "phase": "C",
+      "name": "Climax",
+      "time_window": [150, 220],
+      "core_function": "Reach the emotional peak.",
+      "lyric_anchors": ["climax lyric"],
+      "required_motif_groups": [
+        ["PRAYER_PALMS"],
+        ["UPWARD_REACH"]
+      ],
+      "required_intents": ["SUPPLICATION", "AWAKENING"],
+      "required_formations_any": ["FRONTAL_GROUP"],
+      "hard_requirements": ["must_have_collective_prayer"],
+      "weight": 25
+    },
+    {
+      "phase": "D",
+      "name": "Resolution",
+      "time_window": [220, 300],
+      "core_function": "Resolve and close with unified conviction.",
+      "lyric_anchors": ["closing lyric"],
+      "required_motif_groups": [
+        ["FINAL_TABLEAU"],
+        ["OUTWARD_OPENING"]
+      ],
+      "required_intents": ["UNITY", "CONVICTION"],
+      "required_formations_any": ["BROAD_ARC", "FULL_ENSEMBLE_UNISON"],
+      "hard_requirements": ["must_end_with_unified_still_tableau"],
+      "weight": 40
+    }
+  ]
+}

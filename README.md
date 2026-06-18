@@ -1,6 +1,6 @@
 # choreography-agent-loop
 
-An agentic generate → verify → revise loop for designing Buddhist devotional dance choreography using Claude as the LLM backbone.
+An agentic generate → verify → revise loop for designing devotional dance choreography using Claude as the LLM backbone.
 
 ## How it works
 
@@ -12,22 +12,28 @@ Generate ──► Parse ──► Verify ──► (pass?) ──► done
                        Revise ──► Parse ──► Verify ──► ...
 ```
 
-1. **Generate** — Claude produces a markdown choreography table covering all six narrative phases.
+1. **Generate** — Claude produces a markdown choreography table covering all narrative phases.
 2. **Parse** — the table rows are parsed into `SegmentAnnotation` objects (time window, formation, actions, intent, lyric text).
-3. **Verify** — each phase is scored against its `PhaseContract` (motifs, intents, formation, lyric anchors) and hard requirements are checked (e.g. `DHARMA_WHEEL` in phase C, `PRAYER_PALMS`/`KNEEL` in phase E, `FINAL_TABLEAU` in phase F).
+3. **Verify** — each phase is scored against its `PhaseContract` (motifs, intents, formation, lyric anchors) and hard requirements are checked.
 4. **Revise** — if the score is below 80 or hard requirements fail, targeted feedback is fed back to Claude and the weak phases are rewritten.
 5. The loop repeats up to `--max-iter` times, keeping the best-scoring candidate.
 
-## Narrative phases
+## Configuration
 
-| Phase | Time | Character |
-|-------|------|-----------|
-| A | 0–43 s | Opening grief — bowed, kneeling, sacred shock |
-| B | 28–135 s | Remembrance — compassion, devotion, gentle searching |
-| C | 135–162 s | Who will continue? DHARMA_WHEEL motif, resolve |
-| D | 154–218 s | Crisis — temptation, confusion, pleading appeal |
-| E | 218–268 s | Collective prayer → awakening → vow |
-| F | 260–344 s | Final unity — Dharma endures, FINAL_TABLEAU |
+The piece contract (phases, lyric anchors, motif requirements, etc.) lives in **`default_contract.json`**, which is git-ignored so piece-specific details stay local.
+
+To get started:
+
+```bash
+cp default_contract.example.json default_contract.json
+# edit default_contract.json with your piece details
+```
+
+Or pass any contract file directly at runtime:
+
+```bash
+python main.py --contract my_contract.json
+```
 
 ## Installation
 
@@ -52,7 +58,7 @@ python main.py --contract my_contract.json
 # Save output and cap iterations
 python main.py --output result.txt --max-iter 3
 
-# Print the default contract and exit
+# Print the loaded contract and exit
 python main.py --show-contract
 
 # Suppress per-iteration logs
@@ -75,11 +81,13 @@ choreo-loop --max-iter 3 --output result.txt
 | `verifier.py` | Scores a parsed trace against a piece contract |
 | `parser.py` | Converts markdown table rows into `SegmentAnnotation` objects |
 | `schema.py` | Dataclasses: `SegmentAnnotation`, `PieceContract`, `VerifierResult`, etc. |
-| `contract_builder.py` | Builds the default Buddhist dance contract |
+| `contract_builder.py` | Loads the default contract from `default_contract.json` |
 | `ontology.py` | Controlled vocabulary for motifs, formations, intents |
 | `annotate_video.py` | Standalone video annotation helper |
 | `annotator.py` | Annotation utilities |
 | `llm_client.py` | Thin wrapper around the Anthropic SDK |
+| `default_contract.json` | **Git-ignored** — your piece's contract data |
+| `default_contract.example.json` | Committed template to copy from |
 
 ## Scoring
 

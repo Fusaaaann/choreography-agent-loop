@@ -9,27 +9,26 @@ from __future__ import annotations
 from schema import PieceContract, VerifierResult
 from llm_client import get_client, chat
 
-_SYSTEM = """You are a choreography designer for a Buddhist devotional dance piece.
 
-Narrative arc:
-  A (0–43s):    Opening grief — Buddha enters nirvana. Bowed, kneeling, sacred shock.
-  B (28–135s):  Remembrance — compassion, devotion, gentle searching.
-  C (135–162s): Who will continue? Compact group, circular DHARMA_WHEEL motif, resolve.
-  D (154–218s): Crisis — temptation, confusion, suffering, pleading appeal.
-  E (218–268s): Collective prayer → awakening → vow. Kneeling then rising.
-  F (260–344s): Final unity — Dharma endures. Broad formation, final tableau.
-
-Spatial arc: low mourning → open remembrance → compact responsibility
-             → staggered crisis → kneeling prayer → broad unified final.
-
-Hard requirements:
-  • DHARMA_WHEEL motif (circular hand gesture) must appear in phase C near "谁来转法轮"
-  • Collective prayer (KNEEL + PRAYER_PALMS) must appear in phase E
-  • FINAL_TABLEAU (held still unified pose) must end phase F
-  • Phase A must open with low/bowed/kneeling energy — NOT celebratory
-
-Output format — markdown table with these columns (no preamble, no explanation):
-| Time (mm:ss–mm:ss) | Lyrics | Formation | Movement/Actions | Intent |"""
+def _build_system_prompt(contract: PieceContract) -> str:
+    phase_lines = "\n".join(
+        f"  {p.phase} ({int(p.time_window[0])}–{int(p.time_window[1])}s):  "
+        f"{p.name} — {p.core_function}"
+        for p in contract.phases
+    )
+    hard_reqs = "\n".join(
+        f"  • [{p.phase}] {req}"
+        for p in contract.phases
+        for req in p.hard_requirements
+    )
+    return (
+        f'You are a choreography designer for a devotional dance piece titled "{contract.piece_title}".\n\n'
+        "Narrative arc:\n"
+        f"{phase_lines}\n\n"
+        + ("Hard requirements:\n" + hard_reqs + "\n\n" if hard_reqs else "")
+        + "Output format — markdown table with these columns (no preamble, no explanation):\n"
+        "| Time (mm:ss–mm:ss) | Lyrics | Formation | Movement/Actions | Intent |"
+    )
 
 
 def generate_choreography(contract: PieceContract) -> str:
@@ -39,11 +38,11 @@ def generate_choreography(contract: PieceContract) -> str:
         f"Generate a complete choreography table for this piece.\n\n"
         f"Duration: {int(contract.duration // 60)}:{int(contract.duration % 60):02d}\n"
         f"Contract phases: {[p.phase + ' ' + p.name for p in contract.phases]}\n\n"
-        "Cover all 6 phases A–F in sequence. "
+        f"Cover all {len(contract.phases)} phases in sequence. "
         "Use roughly 3–5 rows per phase. "
         "Return ONLY the markdown table."
     )
-    return chat(client, _SYSTEM, prompt, max_tokens=3000)
+    return chat(client, _build_system_prompt(contract), prompt, max_tokens=3000)
 
 
 def revise_choreography(
@@ -72,7 +71,7 @@ def revise_choreography(
         "Instructions:\n"
         "1. Keep phases that scored ≥ 80 unchanged.\n"
         "2. Fix ONLY the weak/failed phases — address each missing element explicitly.\n"
-        "3. Hard failures MUST be fixed (DHARMA_WHEEL in C, PRAYER_PALMS+KNEEL in E, FINAL_TABLEAU in F).\n"
+        "3. Hard failures MUST be fixed.\n"
         "Return ONLY the complete revised markdown table."
     )
-    return chat(client, _SYSTEM, prompt, max_tokens=3000)
+    return chat(client, _build_system_prompt(contract), prompt, max_tokens=3000)
